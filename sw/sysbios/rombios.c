@@ -1886,7 +1886,7 @@ keyboard_init()
     // Enable Keyboard clock
     outb(PORT_PS2_STATUS,0xae);
     outb(PORT_PS2_STATUS,0xa8);
-
+*/
     // ------------------- keyboard side ------------------------
     // reset keyboard and self test  (keyboard side)
     outb(PORT_PS2_DATA, 0xff);
@@ -1914,7 +1914,32 @@ keyboard_init()
     if ((inb(PORT_PS2_DATA) != 0xaa)) {
         keyboard_panic(994);
     }
-
+    
+    // Set scancodes
+    outb(PORT_PS2_DATA, 0xf0);
+    
+    // Wait for data
+    max=0xffff;
+    while ( ((inb(PORT_PS2_STATUS) & 0x01) == 0) && (--max>0) ) outb(PORT_DIAG, 0x41);
+    if (max==0x0) keyboard_panic(41);
+    
+    if ((inb(PORT_PS2_DATA) != 0xfa)) {
+        keyboard_panic(995);
+    }
+    
+    // Set 1
+    outb(PORT_PS2_DATA, 0x01);
+    
+    // Wait for data
+    max=0xffff;
+    while ( ((inb(PORT_PS2_STATUS) & 0x01) == 0) && (--max>0) ) outb(PORT_DIAG, 0x50);
+    if (max==0x0) keyboard_panic(50);
+    
+    if ((inb(PORT_PS2_DATA) != 0xfa)) {
+        keyboard_panic(996);
+    }
+    
+    /*
     // Disable keyboard
     outb(PORT_PS2_DATA, 0xf5);
 
@@ -4566,7 +4591,7 @@ ASM_END
                         break;
                     case 1:
                         set_e820_range(ES, regs.u.r16.di,
-                                       0x0009f000L, 0x000d0000L, 0, 0, E820_RESERVED);
+                                       0x0009f000L, 0x000a0000L, 0, 0, E820_RESERVED);
                         regs.u.r32.ebx = 2;
                         break;
                     case 2:
