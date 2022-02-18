@@ -4591,7 +4591,7 @@ ASM_END
                         break;
                     case 1:
                         set_e820_range(ES, regs.u.r16.di,
-                                       0x0009f000L, 0x000d0000L, 0, 0, E820_RESERVED);
+                                       0x0009f000L, 0x000a0000L, 0, 0, E820_RESERVED);
                         regs.u.r32.ebx = 2;
                         break;
                     case 2:
