@@ -10,7 +10,7 @@ jobs:
     
     strategy:
       matrix:
-        key: [0, 1, 2, 3]
+        build_index: [0, 1, 2, 3, 4, 5, 6, 7]
       fail-fast: false
       
     steps:
@@ -23,3 +23,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DISPATCH_TOKEN: ${{ secrets.BUILD_AUTOMATION_DISPATCH_TOKEN }}
         WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLIES_WEBHOOK_URL }}
+        BUILD_INDEX: ${{ matrix.build_index }}
