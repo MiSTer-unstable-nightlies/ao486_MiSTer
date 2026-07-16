@@ -50,8 +50,8 @@ module gf1
 	reg clk4_chc0;
 	reg clk4_chc0n;
 	
-	reg voice_ram_update_pipeline;
-	reg voice_ram_update;
+	//reg voice_ram_update_pipeline;
+	//reg voice_ram_update;
 	
 	reg [4:0] chan_sel;
 	
@@ -547,7 +547,7 @@ module gf1
 	reg glob_data_rd2;
 	reg glob_data_rd3;
 	
-	wire cpu_write_4 = cpu_write & CS1 & cpu_addr_4;
+	//wire cpu_write_4 = cpu_write & CS1 & cpu_addr_4;
 	wire cpu_write_5 = cpu_write & CS1 & cpu_addr_5;
 
 	wire glob_addr_41 = glob_reg_l2[6:0] == 7'h41;
@@ -557,9 +557,9 @@ module gf1
 	wire glob_addr_45 = glob_reg_l2[6:0] == 7'h45;
 	wire glob_addr_46 = glob_reg_l2[6:0] == 7'h46;
 	wire glob_addr_47 = glob_reg_l2[6:0] == 7'h47;
-	wire glob_addr_48 = glob_reg_l2[6:0] == 7'h48;
-	wire glob_addr_49 = glob_reg_l2[6:0] == 7'h49;
-	wire glob_addr_4b = glob_reg_l2[6:0] == 7'h4b;
+	//wire glob_addr_48 = glob_reg_l2[6:0] == 7'h48;
+	//wire glob_addr_49 = glob_reg_l2[6:0] == 7'h49;
+	//wire glob_addr_4b = glob_reg_l2[6:0] == 7'h4b;
 	wire glob_addr_4c = glob_reg_l2[6:0] == 7'h4c;
 	
 	assign dma_writedata = dram_dma_rd_latch;
@@ -808,7 +808,7 @@ module gf1
 	reg ram_strobe;
 	reg ram_wr_strobe;
 	
-	reg w1816;
+	//reg w1816;
 	reg w1822;
 	reg w1848;
 	reg w1885;
@@ -853,7 +853,8 @@ module gf1
 	wire [12:0] atten1 = { 1'h0, atten_l[1] } + { pan_atten, 4'h0 };
 	wire [11:0] atten = ((pan == 4'hf) | atten1[12]) ? 12'h000 : atten1[11:0];
 	
-	reg [15:0] val_shifted;
+	reg  [15:0] val_shifted;
+	wire [30:0] val_shifted32 = {{15{mul_result[24]}}, mul_result[24:9]} >> (~atten[11:8]);
 	
 	reg [20:0] accum_l[0:1];
 	
@@ -1293,13 +1294,13 @@ module gf1
 		
 		//if (~chan_c0)
 		//	voice_ram_update_pipeline = clk2;
-		voice_ram_update_pipeline = chan_c0 & clk2;
+		//voice_ram_update_pipeline = chan_c0 & clk2;
 		
 		//if (voice_write_pending[1])
 		//	w1816 = clk2;
-		w1816 = voice_write_pending[1] & clk4;
+		//w1816 = voice_write_pending[1] & clk4;
 		
-		voice_ram_update = voice_ram_update_pipeline | w1816;
+		//voice_ram_update = voice_ram_update_pipeline | w1816;
 		
 		//if (voice_rw_pending)
 		//	w1848 = clk3;
@@ -2527,10 +2528,7 @@ module gf1
 			default: pan_atten = 9'h0;
 		endcase
 
-		if (clk2)
-		begin
-			val_shifted <= {{15{mul_result[24]}}, mul_result[24:9]} >> (~atten[11:8]);
-		end
+		if (clk2) val_shifted <= val_shifted32[15:0];
 
 		if (w2416)
 			accum_l[0] <= accum_sum;

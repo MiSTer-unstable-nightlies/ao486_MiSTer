@@ -180,8 +180,29 @@ wire        mgmt_rtc_cs;
 wire        interrupt_done;
 wire        interrupt_do;
 wire  [7:0] interrupt_vector;
-reg  [15:0] interrupt;
-wire        irq_0, irq_1, irq_2, irq_3, irq_4, irq_6, irq_8, irq_9, irq_12, irq_14, irq_15;
+wire [15:0] irq;
+
+// IRQ map:
+//
+//  0 - PIT
+//  1 - Keyboard
+//  2 - VGA
+//  3 - UART 2
+//  4 - UART 1
+//  5 - SB, GUS
+//  6 - Floppy
+//  7 - SB, GUS
+//  8 - RTC
+//  9 - MPU(MIDI)
+// 10 - SB
+// 11 - 
+// 12 - Mouse
+// 13 - 
+// 14 - IDE 0
+// 15 - IDE 1
+assign irq[11] = 0;
+assign irq[13] = 0;
+
 
 wire        sb_irq;
 wire        sb_irq_5_en;
@@ -519,7 +540,7 @@ floppy floppy
 	.wp                (floppy_wp),
 
 	.request           (fdd_request),
-	.irq               (irq_6)
+	.irq               (irq[6])
 );
 
 wire [3:0] ide_address = {iobus_address[9],iobus_address[2:0]};
@@ -553,7 +574,7 @@ ide ide0
 	.mgmt_read         (mgmt_read & mgmt_ide0_cs),
 
 	.request           (ide0_request),
-	.irq               (irq_14)
+	.irq               (irq[14])
 );
 
 wire ide1_nodata;
@@ -585,7 +606,7 @@ ide ide1
 	.mgmt_read         (mgmt_read & mgmt_ide1_cs),
 
 	.request           (ide1_request),
-	.irq               (irq_15)
+	.irq               (irq[15])
 );
 
 joystick joystick
@@ -623,7 +644,7 @@ pit pit
 	.io_write          (iobus_write & pit_cs),
 
 	.speaker_out       (speaker_out),
-	.irq               (irq_0)
+	.irq               (irq[0])
 );
 
 ps2 ps2
@@ -653,8 +674,8 @@ ps2 ps2
 	.output_reset_n    (ps2_reset_n),
 	.a20_enable        (a20_enable),
 
-	.irq_keyb          (irq_1),
-	.irq_mouse         (irq_12)
+	.irq_keyb          (irq[1]),
+	.irq_mouse         (irq[12])
 );
 
 rtc rtc
@@ -676,7 +697,7 @@ rtc rtc
 
 	.bootcfg           ({bootcfg[5:2], bootcfg[1:0] ? bootcfg[1:0] : {~fdd0_inserted, fdd0_inserted}}),
 
-	.irq               (irq_8)
+	.irq               (irq[8])
 );
 
 sound sound
@@ -775,6 +796,11 @@ gus gus
 
 );
 
+// GUS uses IRQ5 if SB doesn't occupy it, otherwise IRQ7
+assign irq[5]  = (sb_irq_5_en & sb_irq) | (~sb_irq_5_en & gus_irq);
+assign irq[7]  = (sb_irq_7_en & sb_irq) | ( sb_irq_5_en & gus_irq);
+assign irq[10] = (sb_irq_10_en & sb_irq);
+
 uart uart1
 (
 	.clk               (clk_sys),
@@ -797,7 +823,7 @@ uart uart1
 	.dtr_n             (uart1_dtr_n),
 	.ri_n              (1),
 
-	.irq               (irq_4)
+	.irq               (irq[4])
 );
 
 uart uart2
@@ -822,7 +848,7 @@ uart uart2
 	.dtr_n             (uart2_dtr_n),
 	.ri_n              (1),
 
-	.irq               (irq_3)
+	.irq               (irq[3])
 );
 
 mpu mpu
@@ -842,7 +868,7 @@ mpu mpu
 	.tx                (mpu_tx),
 
 	.double_rate       (1),
-	.irq               (irq_9)
+	.irq               (irq[9])
 );
 
 vga vga
@@ -891,7 +917,7 @@ vga vga
 	.vga_lores         (video_lores),
 	.vga_border        (video_border),
 
-	.irq               (irq_2)
+	.irq               (irq[2])
 );
 
 pic pic
@@ -910,26 +936,8 @@ pic pic
 	.interrupt_vector  (interrupt_vector),
 	.interrupt_done    (interrupt_done),
 	.interrupt_do      (interrupt_do),
-	.interrupt_input   (interrupt)
+	.interrupt_input   (irq)
 );
-
-always @* begin
-	interrupt = 0;
-
-	interrupt[0]  = irq_0;
-	interrupt[1]  = irq_1;
-	interrupt[3]  = irq_3;
-	interrupt[4]  = irq_4;
-	interrupt[5]  = (sb_irq & sb_irq_5_en) | (gus_irq & sb_irq_7_en);
-	interrupt[6]  = irq_6;
-	interrupt[7]  = (sb_irq & sb_irq_7_en) | (gus_irq & sb_irq_5_en);
-	interrupt[8]  = irq_8;
-	interrupt[9]  = irq_9 | irq_2;
-	interrupt[10] = (sb_irq & sb_irq_10_en);
-	interrupt[12] = irq_12;
-	interrupt[14] = irq_14;
-	interrupt[15] = irq_15;
-end
 
 assign mgmt_ide0_cs  = (mgmt_address[15:8] == 8'hF0);
 assign mgmt_ide1_cs  = (mgmt_address[15:8] == 8'hF1);

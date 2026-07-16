@@ -46,15 +46,15 @@ wire gf1_clk2 = gf1_clk[16];
 always @(posedge clk)
 	begin
 		if (clock_rate == 100_000_000)
-					gf1_clk <= gf1_clk + 12948;   // = (9_878_400 * 2 *65536) / 100_000_000
+					gf1_clk <= gf1_clk + 17'd12948;   // = (9_878_400 * 2 *65536) / 100_000_000
 		else if (clock_rate == 56_250_000)
-					gf1_clk <= gf1_clk + 23018;   // = (9_878_400 * 2 *65536) / 56_250_000
+					gf1_clk <= gf1_clk + 17'd23018;   // = (9_878_400 * 2 *65536) / 56_250_000
 		else if (clock_rate == 30_000_000)
-					gf1_clk <= gf1_clk + 43159;   // = (9_878_400 * 2 *65536) / 30_000_000
+					gf1_clk <= gf1_clk + 17'd43159;   // = (9_878_400 * 2 *65536) / 30_000_000
 		else if (clock_rate == 15_000_000)
-					gf1_clk <= gf1_clk + 86319;   // = (9_878_400 * 2 *65536) / 15_000_000  !!! Not correct !!
+					gf1_clk <= gf1_clk + 17'd86319;   // = (9_878_400 * 2 *65536) / 15_000_000  !!! Not correct !!
 		else
-					gf1_clk <= gf1_clk + 14386;   // = (9_878_400 * 2 *65536) / 90_000_000
+					gf1_clk <= gf1_clk + 17'd14386;   // = (9_878_400 * 2 *65536) / 90_000_000
 	end
 
 wire [19:0] dram_addr;
@@ -126,7 +126,7 @@ assign  readdata = isgf1addr ? readdata_gf1 : 8'hff;
 	wire ismixeraddr = gus_cs & ~io_address8 & (io_address[3:0] == 4'h0);
 //	wire isdmairqaddr = gus_cs & ~io_address8 & (io_address[3:0] == 4'hb);
 
-reg  dmairq_regsel;
+//reg  dmairq_regsel;
 reg  dmairq_enable;
 assign dma_req = dmairq_enable & dreq;
 assign irq = dmairq_enable & (irq1 | irq2);
@@ -170,7 +170,7 @@ always @(posedge clk)
 		write_wait <= { write_wait[0], (~write_d & gf1_write) ? 1'b1 : 1'b0 };
 
 		if (ismixeraddr & write) begin
-			dmairq_regsel <= writedata[6];
+			//dmairq_regsel <= writedata[6];
 			dmairq_enable <= writedata[3];
 		end
 
