@@ -619,6 +619,8 @@ system system
 	.sample_sb_r          (sb_out_r),
 	.sample_opl_l         (opl_out_l),
 	.sample_opl_r         (opl_out_r),
+	.sample_gus_l         (gus_out_l),
+	.sample_gus_r         (gus_out_r),
 	.sound_fm_mode        (status[3]),
 	.sound_cms_en         (status[17]),
 	.sbp                  (sbp),
@@ -698,7 +700,20 @@ system system
 	.DDRAM_BURSTCNT       (DDRAM_BURSTCNT),
 	.DDRAM_BUSY           (DDRAM_BUSY),
 	.DDRAM_RD             (DDRAM_RD),
-	.DDRAM_WE             (DDRAM_WE)
+	.DDRAM_WE             (DDRAM_WE),
+
+	.pll_locked           (pll_locked),
+	.SDRAM_DQ             (SDRAM_DQ),
+	.SDRAM_A              (SDRAM_A),
+	.SDRAM_DQML           (SDRAM_DQML),
+	.SDRAM_DQMH           (SDRAM_DQMH),
+	.SDRAM_BA             (SDRAM_BA),
+	.SDRAM_nCS            (SDRAM_nCS),
+	.SDRAM_nWE            (SDRAM_nWE),
+	.SDRAM_nRAS           (SDRAM_nRAS),
+	.SDRAM_nCAS           (SDRAM_nCAS),
+	.SDRAM_CLK            (SDRAM_CLK),
+	.SDRAM_CKE            (SDRAM_CKE)
 );
 
 wire [7:0] syscfg;
@@ -860,6 +875,8 @@ always @(posedge CLK_AUDIO) begin
 	spk_out <= spk >> ~vol_spk;
 end
 
+wire [15:0] gus_out_l, gus_out_r;
+
 // CD-DA (Redbook audio)
 wire [15:0] cdda_l;
 wire [15:0] cdda_r;
@@ -939,13 +956,15 @@ always @(posedge CLK_AUDIO) begin
 		           + {sb_l_swap[15],sb_l_swap}                  // SB DAC/DMA
 		           + {opl_l[15],opl_l}                          // OPL2/3 FM synthesis
 		           + (vol_en[2] ? {cd_l[15],cd_l} : 17'd0)      // CD-DA (Redbook audio)
-		           + (mt32_mute ? 17'd0 : {mt32_l[15],mt32_l}); // MT-32
+		           + (mt32_mute ? 17'd0 : {mt32_l[15],mt32_l})  // MT-32
+		           + {gus_out_l[15],gus_out_l};                 // GUS
 		mix_tmp_r <= spk_out
 		           + {2'b00, cms_out_r, cms_out_r[8:4]}
 		           + {sb_r_swap[15],sb_r_swap}
 		           + {opl_r[15],opl_r}
 		           + (vol_en[1] ? {cd_r[15],cd_r} : 17'd0)
-		           + (mt32_mute ? 17'd0 : {mt32_r[15],mt32_r});
+		           + (mt32_mute ? 17'd0 : {mt32_r[15],mt32_r})
+		           + {gus_out_r[15],gus_out_r};
 	end
 
 	// Hard clip to prevent overflow
