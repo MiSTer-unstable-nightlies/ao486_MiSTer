@@ -45,7 +45,7 @@ led fdd_led(clk_sys, |mgmt_req[7:6], LED_USER);
 // 0         1         2         3          4         5         6
 // 01234567890123456789012345678901 23456789012345678901234567890123
 // 0123456789ABCDEFGHIJKLMNOPQRSTUV 0123456789ABCDEFGHIJKLMNOPQRSTUV
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 `include "build_id.v"
 localparam CONF_STR =
@@ -101,7 +101,7 @@ localparam CONF_STR =
 	"P2-;",
 	"P2OA,USER I/O,MIDI,COM2;",
 	"P2-;",
-	"P2OCE,Joystick Type,2 Buttons,4 Buttons,Gravis Pro,None,CH Flightst., Thrustmaster;",
+	"P2OCE,Joystick Type,2 Buttons,4 Buttons,Gravis Pro,None,CH Flightst.,Thrustmaster;",
 	"P2oFG,Joystick Mode,2 Joysticks,2 Sticks,2 Wheels,4-axes Wheel;",
 	"P2oQR,Joystick Axes,Timed,Count 8+141,Count 0+256,Count 6+256;",
 	"P2oH,Joystick 1,Enabled,Disabled;",
@@ -227,7 +227,7 @@ hps_ext hps_ext
 	.cdda_dout(cdda_dout),
 
 	.ext_req(mgmt_req),
-	.ext_hotswap(status[39:38])
+	.ext_hotswap({status[39],~status[38]})
 );
 
 /////////////////////////////  PLL  ////////////////////////////////////
